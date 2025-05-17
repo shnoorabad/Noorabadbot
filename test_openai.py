@@ -13,4 +13,4 @@ response = openai.ChatCompletion.create(
 
 reply = response.choices[0].message.content
 print("پاسخ دریافت شد:")
-print(reply))
+print(reply)
