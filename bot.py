@@ -32,11 +32,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text.strip()
 
     predefined_responses = {
-        "آدرس شهرداری": "نورآباد، میدان اصلی، ساختمان شهرداری.",
-        "ساعات کاری شهرداری": "شنبه تا چهارشنبه، ساعت ۸ تا ۱۴.",
+        "آدرس شهرداری": "نورآباد،خیابان کشاورز، ساختمان شهرداری.",
+        "ساعات کاری شهرداری": "شنبه تا چهارشنبه، ساعت ۷:۳۰ تا ۱۴.",
         "ثبت شکایت": "لطفاً شکایت خود را تایپ و ارسال کنید.",
-        "شماره تماس": "۰۶۶۳۲۵۵۲۲۰۰",
-        "نحوه دریافت مجوز ساخت": "برای دریافت مجوز ساخت، به واحد شهرسازی مراجعه فرمایید.",
+        "شماره تماس": "۰۶۶۳۲۷۲۴۰۵۷-۸",
+        "نحوه دریافت مجوز ساخت": "برای دریافت مجوز ساخت، به واحد ساختمانی مراجعه فرمایید.",
         "خروج": "خدانگهدار!"
     }
 
@@ -45,7 +45,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         try:
             response = openai.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4-turbo",
                 messages=[{"role": "user", "content": text}]
             )
             reply = response.choices[0].message.content
