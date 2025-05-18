@@ -1,3 +1,32 @@
+import os
+import openai
+from telegram import Update, ReplyKeyboardMarkup
+from telegram.ext import (
+    ApplicationBuilder,
+    ContextTypes,
+    CommandHandler,
+    MessageHandler,
+    filters
+)
+
+# کلید API
+openai.api_key = os.getenv("OPENAI_KEY")
+TELEGRAM_BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+# کیبورد ساده
+keyboard = [
+    ["آدرس شهرداری", "ساعات کاری شهرداری"],
+    ["درباره ما", "شماره تماس"],
+    ["نحوه دریافت مجوز ساخت", "خروج"]
+]
+markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+
+# دستور start
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "سلام! به ربات شهرداری نورآباد خوش آمدید.", reply_markup=markup
+    )
+
 # مدیریت پیام‌ها
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
