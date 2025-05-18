@@ -45,7 +45,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         try:
             response = openai.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4-turbo",
                 messages=[{"role": "user", "content": text}]
             )
             reply = response.choices[0].message.content
