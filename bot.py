@@ -1,57 +1,55 @@
 import os
 import openai
 from telegram import Update, ReplyKeyboardMarkup
-from telegram.ext import (
-    ApplicationBuilder,
-    ContextTypes,
-    CommandHandler,
-    MessageHandler,
-    filters
-)
+from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters
 
-# کلید API
-openai.api_key = os.getenv("OPENAI_KEY")
-TELEGRAM_BOT_TOKEN = os.getenv("BOT_TOKEN")
+# دریافت کلیدها از محیط
+TELEGRAM_BOT_TOKEN = os.environ["BOT_TOKEN"]
+OPENAI_API_KEY = os.environ["OPENAI_KEY"]
+openai.api_key = OPENAI_API_KEY
 
-# کیبورد ساده
-keyboard = [
+# کیبورد اولیه
+reply_keyboard = [
     ["آدرس شهرداری", "ساعات کاری شهرداری"],
-    ["درباره ما", "شماره تماس"],
+    ["ثبت شکایت", "شماره تماس"],
     ["نحوه دریافت مجوز ساخت", "خروج"]
 ]
-markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+markup = ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True)
 
-# دستور start
+# پاسخ به /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "سلام! به ربات شهرداری نورآباد خوش آمدید.", reply_markup=markup
-    )
+    await update.message.reply_text("سلام، به ربات شهرداری نورآباد خوش آمدید.", reply_markup=markup)
 
-# مدیریت پیام‌ها
+# پاسخ به دکمه‌ها و سوالات
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    text = update.message.text
+    user_message = update.message.text
 
-    responses = {
-        "آدرس شهرداری": "نورآباد، خیابان کشاورز ، ساختمان شهرداری.",
-        "ساعات کاری شهرداری": "شنبه تا چهارشنبه، ساعت ۸ تا ۱۴.",
-        "درباره ما": "سرپست شهرداری؛ محمد مرادپور ،تهیه وتدوین ربات : علی معصومی پور.",
-        "شماره تماس": "۰۶۶۳۲۷۲۴۰۵۷-۸",
-        "نحوه دریافت مجوز ساخت": "برای دریافت مجوز ساخت، به واحد ساختمانی مراجعه فرمایید.",
+    predefined_responses = {
+        "آدرس شهرداری": "نورآباد، میدان اصلی، ساختمان شهرداری.",
+        "ساعات کاری شهرداری": "شنبه تا چهارشنبه از ۸ صبح تا ۲ بعدازظهر.",
+        "ثبت شکایت": "لطفاً شکایت خود را تایپ و ارسال نمایید.",
+        "شماره تماس": "۰۶۶۳۲۵۵۲۲۰۰",
+        "نحوه دریافت مجوز ساخت": "برای دریافت مجوز ساخت به واحد شهرسازی مراجعه نمایید.",
         "خروج": "خدانگهدار!"
     }
 
-    if text in responses:
-        await update.message.reply_text(responses[text])
+    if user_message in predefined_responses:
+        await update.message.reply_text(predefined_responses[user_message])
     else:
+        # ارسال سؤال به OpenAI
         try:
-            chat = openai.ChatCompletion.create(
+            response = openai.ChatCompletion.create(
                 model="gpt-4-turbo",
-                messages=[
-                    {"role": "system", "content": "شما یک ربات پاسخگوی شهرداری نورآباد هستید. شهردار فعلی نورآباد علی نجات نورعلی است. به سوالات مردم درباره شهرداری پاسخ بده."},
-                    {"role": "user", "content": text}
-                ]
+                messages=[{"role": "user", "content": user_message}]
             )
-            reply = chat.choices[0].message.content
+            reply = response["choices"][0]["message"]["content"]
             await update.message.reply_text(reply)
         except Exception as e:
             await update.message.reply_text("خطایی رخ داد. لطفاً بعداً تلاش کنید.")
+
+# اجرای برنامه
+if __name__ == "__main__":
+    app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    app.run_polling()
